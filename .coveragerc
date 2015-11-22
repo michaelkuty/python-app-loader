@@ -1,0 +1,5 @@
+[run]
+source = app_loader
+omit =
+    *migrations*
+    app_loader/__init__.py
