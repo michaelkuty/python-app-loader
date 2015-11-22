@@ -45,33 +45,6 @@ class Config(dict):
         """return module version"""
         return get_versions([self.module_name]).get(self.module_name, None)
 
-    @property
-    def latest_version(self):
-        """return latest version if is available"""
-        from leonardo_system.pip import check_versions
-        return check_versions(True).get(self.name, None).get('new', None)
-
-    @property
-    def needs_migrations(self):
-        """Indicates whater module needs migrations"""
-        # TODO(majklk): also check models etc.
-        if len(self.widgets) > 0:
-            return True
-        return False
-
-    @property
-    def needs_sync(self):
-        """Indicates whater module needs templates, static etc."""
-
-        affected_attributes = [
-            'css_files', 'js_files',
-            'scss_files', 'widgets']
-
-        for attr in affected_attributes:
-            if len(getattr(self, attr)) > 0:
-                return True
-        return False
-
     def set_module(self, module):
         """Just setter for module"""
         setattr(self, "module", module)
@@ -107,7 +80,14 @@ class MasterConfig(object):
         if self.use_cache and attr in self._config:
             return self._config[attr]
 
-        default_value = self.config_spec.get(attr)
+        if attr not in self.config_spec.keys():
+            raise KeyError('You tries to access key {}'
+                           ' which is not declared in spec {}'.format(
+                               attr,
+                               ', '.join(self.config_spec.keys())))
+
+        default_value = self.config_spec.get(attr, None)
+
         items = default_value
 
         for mod, config in self.modules:
@@ -119,4 +99,3 @@ class MasterConfig(object):
             self._config[attr] = items
 
         return items
-
