@@ -64,6 +64,8 @@ LANGUAGES = (('en', 'English'), ('cs', 'Czech'))
 
 LEONARDO_MODULE_AUTO_INCLUDE = False
 
+FAVICON_PATH = "/whatever"
+
 APPS = [
     'app_loader',
 ]

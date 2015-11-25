@@ -10,7 +10,7 @@ class CommandTest(TestCase):
 
     def test_00_app_class(self):
 
-    	from app_loader.apps import Config
+        from app_loader.apps import Config
 
         self.assertIsInstance(Config.LEONARDO_APPS, list)
 
@@ -46,7 +46,6 @@ class CommandTest(TestCase):
 
         with self.assertRaises(KeyError):
             app_loader.config.hovno
-
 
         # just propagate all loaded modules to settings
         modules = app_loader.get_modules()
