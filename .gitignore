@@ -1,6 +1,8 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
+.eggs
+.DS_Store
 
 leonardo/local/.secret_key_store
 
