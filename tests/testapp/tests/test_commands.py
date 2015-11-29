@@ -14,7 +14,6 @@ class CommandTest(TestCase):
 
         self.assertIsInstance(Config.LEONARDO_APPS, list)
 
-
     def test_01_app_loader(self):
 
         app_loader.disable_autoload()
@@ -30,6 +29,8 @@ class CommandTest(TestCase):
         self.assertEqual(hasattr(config, 'apps'), True)
 
         self.assertIn('testapp', config.apps)
+        self.assertIn('testapp', config.module_name)
+        self.assertIn('testapp', config.name)
 
     def test_01_custom_app(self):
 
@@ -59,3 +60,29 @@ class CommandTest(TestCase):
         self.assertEqual(config.module, testapp)
 
         self.assertIn('testapp', config.apps)
+
+
+    def test_02_custom_classes(self):
+
+        from app_loader.config import Config, MasterConfig
+        self.assertIsInstance(app_loader.empty_config, Config)
+
+        self.assertIsInstance(app_loader.config, MasterConfig)
+
+
+    def test_03_utils(self):
+
+        from app_loader.utils import merge
+
+        array = ["one", "two"]
+        array1 = ["one"]
+        self.assertEqual(merge(array, array1), ["one", "two"])
+        self.assertEqual(merge(array1, array), ["one", "two"])
+
+        dic = {"test1": "value", "test2": "hello"}
+        dic1 = {"test1": "value", "test3": "hello"}
+
+        self.assertEqual(merge(dic, dic1), {"test1": "value", "test3": "hello", "test2": "hello"})
+        self.assertEqual(merge(dic1, dic), {"test1": "value", "test3": "hello", "test2": "hello"})
+
+

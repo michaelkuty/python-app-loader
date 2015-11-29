@@ -14,6 +14,7 @@ app_loader.load_modules()
 # just propagate all loaded modules to settings
 LEONARDO_MODULES = app_loader.get_modules()
 
+
 # override all
 try:
     from local_settings import *
