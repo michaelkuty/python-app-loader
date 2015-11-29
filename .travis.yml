@@ -4,6 +4,8 @@ python:
   - 2.7
   - 3.5
 env:
+  global:
+   - PBR_VERSION="1.2.3"
   matrix:
    - DJANGO_REQUIREMENT="Django>=1.8,<1.9"
    - DJANGO_REQUIREMENT="Django>=1.7,<1.8"
