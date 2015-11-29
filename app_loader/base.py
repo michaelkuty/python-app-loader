@@ -3,7 +3,7 @@ import warnings
 
 from importlib import import_module  # noqa
 
-from .utils import get_key_from_module, get_object, merge
+from .utils import get_key_from_module, get_object, merge, _decorate_urlconf
 
 
 class AppLoader(object):
@@ -123,66 +123,6 @@ class AppLoader(object):
 
             self._modules = modules
         return self._modules
-
-    @property
-    def urlpatterns(self):
-        '''load and decorate urls from all modules
-        then store it as cached property for less loading
-        '''
-
-        # Django-specific: import django now
-        from django.utils.module_loading import module_has_submodule  # noqa
-        from django.conf.urls import include, patterns, url
-
-        if hasattr(self, "_urlpatterns"):
-            return self._urlpatterns
-
-        urlpatterns = []
-        # load all urls
-        # support .urls file and urls_conf = 'elephantblog.urls' on default module
-        # decorate all url patterns if is not explicitly excluded
-
-        for mod in self.modules:
-            # TODO this not work
-            if self.is_leonardo_module(mod):
-
-                conf = self.get_conf_from_module(mod)
-
-                if module_has_submodule(mod, 'urls'):
-                    urls_mod = import_module('.urls', mod.__name__)
-                    if hasattr(urls_mod, 'urlpatterns'):
-                        # if not public decorate all
-
-                        if conf['public']:
-                            urlpatterns += urls_mod.urlpatterns
-                        else:
-                            _decorate_urlconf(urls_mod.urlpatterns,
-                                              require_auth)
-                            urlpatterns += urls_mod.urlpatterns
-
-        # avoid circural dependency
-        # TODO use our loaded modules instead this property
-        from django.conf import settings
-        for urls_conf, conf in getattr(settings, 'MODULE_URLS', {}).items():
-            # is public ?
-            try:
-                if conf['is_public']:
-                    urlpatterns += \
-                        patterns('',
-                                 url(r'', include(urls_conf)),
-                                 )
-                else:
-                    _decorate_urlconf(
-                        url(r'', include(urls_conf)),
-                        require_auth)
-                    urlpatterns += patterns('',
-                                            url(r'', include(urls_conf)))
-            except Exception as e:
-                raise Exception('raised %s during loading %s' %
-                                (str(e), urls_conf))
-
-        self._urlpatterns = urlpatterns
-        return self._urlpatterns
 
     def is_leonardo_module(self, mod):
         """returns True if is our module
@@ -304,7 +244,8 @@ class AppLoader(object):
                     app_module = self.find_config_module(app_module)
                     if depth < max_depth:
                         mod_conf = self.extract_conf_from(
-                            app_module, conf=self.empty_config, depth=depth + 1)
+                            app_module, conf=self.empty_config,
+                            depth=depth + 1)
                         for k, v in mod_conf.items():
                             # prevent config duplicity
                             # skip config merge
@@ -326,3 +267,66 @@ class AppLoader(object):
         if not cls._instance:
             cls._instance = super(AppLoader, cls).__new__(cls, *args, **kwargs)
         return cls._instance
+
+    @property
+    def urlpatterns(self):
+        '''load and decorate urls from all modules
+
+        This is example how use this loader in Django app
+
+        basically this method is designed to be overwritten, but
+        in the default state loads all urlpatterns and decorate it with
+        require_auth decorator which can be change using
+        '''
+
+        # Django-specific: import django now
+        from django.utils.module_loading import module_has_submodule  # noqa
+        from django.contrib.auth.decorators import login_required
+        from django.conf.urls import include, patterns, url
+
+        if hasattr(self, "_urlpatterns"):
+            return self._urlpatterns
+
+        urlpatterns = []
+
+        for mod in self.modules:
+            # TODO this not work
+            if self.is_leonardo_module(mod):
+
+                conf = self.get_conf_from_module(mod)
+
+                if module_has_submodule(mod, 'urls'):
+                    urls_mod = import_module('.urls', mod.__name__)
+                    if hasattr(urls_mod, 'urlpatterns'):
+                        # if not public decorate all
+
+                        if conf['public']:
+                            urlpatterns += urls_mod.urlpatterns
+                        else:
+                            _decorate_urlconf(urls_mod.urlpatterns,
+                                              login_required)
+                            urlpatterns += urls_mod.urlpatterns
+
+        # avoid circural dependency
+        # TODO use our loaded modules instead this property
+        from django.conf import settings
+        for urls_conf, conf in getattr(settings, 'MODULE_URLS', {}).items():
+            # is public ?
+            try:
+                if conf['is_public']:
+                    urlpatterns += \
+                        patterns('',
+                                 url(r'', include(urls_conf)),
+                                 )
+                else:
+                    _decorate_urlconf(
+                        url(r'', include(urls_conf)),
+                        login_required)
+                    urlpatterns += patterns('',
+                                            url(r'', include(urls_conf)))
+            except Exception as e:
+                raise Exception('raised %s during loading %s' %
+                                (str(e), urls_conf))
+
+        self._urlpatterns = urlpatterns
+        return self._urlpatterns

@@ -52,3 +52,21 @@ def get_object(path, fail_silently=False):
         except (AttributeError, ImportError):
             if not fail_silently:
                 raise
+
+
+def _decorate_urlconf(urlpatterns, decorator, *args, **kwargs):
+    '''Decorate all urlpatterns by specified decorator'''
+
+    if isinstance(urlpatterns, (list, tuple)):
+
+        for pattern in urlpatterns:
+            if getattr(pattern, 'callback', None):
+                pattern._callback = decorator(
+                    pattern.callback, *args, **kwargs)
+            if getattr(pattern, 'url_patterns', []):
+                _decorate_urlconf(
+                    pattern.url_patterns, decorator, *args, **kwargs)
+    else:
+        if getattr(urlpatterns, 'callback', None):
+            urlpatterns._callback = decorator(
+                urlpatterns.callback, *args, **kwargs)

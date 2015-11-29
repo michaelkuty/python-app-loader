@@ -22,9 +22,7 @@ before_script:
   - psql -c 'create database django_leonardo;' -U postgres
 script:
   - cd tests
-  - coverage run --branch --include="*test/test*" manage.py test testapp
-  - coverage report
-  - coverage html
+  - coverage run manage.py test testapp && flake8 ../app_loader
 after_success:
   - coveralls
 branches:

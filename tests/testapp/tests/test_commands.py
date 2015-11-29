@@ -86,3 +86,9 @@ class CommandTest(TestCase):
         self.assertEqual(merge(dic1, dic), {"test1": "value", "test3": "hello", "test2": "hello"})
 
 
+    def test_04_urlpatterns(self):
+
+        from app_loader import app_loader
+
+        # TODO test reverse and decorator
+        app_loader.urlpatterns

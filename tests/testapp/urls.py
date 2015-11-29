@@ -1,9 +1,7 @@
 from __future__ import absolute_import, unicode_literals
 
 
-from django.conf.urls import patterns, include, url
+from app_loader import app_loader
 
-urlpatterns = patterns(
-    '',
-    url(r'', include('leonardo.urls')),
-)
+
+urlpatterns = app_loader.urlpatterns
