@@ -23,10 +23,10 @@ before_script:
 script:
   - cd tests
   - coverage run --branch --include="*test/test*" manage.py test testapp
-after_success:
-  - coveralls
   - coverage report
   - coverage html
+after_success:
+  - coveralls
 branches:
   only:
     - master
