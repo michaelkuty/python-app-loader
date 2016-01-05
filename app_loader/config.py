@@ -1,10 +1,5 @@
 
 
-from importlib import import_module
-from django.utils import six
-from .versions import get_versions
-from .spec import CONF_SPEC
-import warnings
 from .utils import merge
 
 
@@ -16,15 +11,6 @@ class Config(dict):
     use dictionary as constructor
 
     """
-
-    def get_value(self, key, values):
-        '''Accept key of propery and actual values'''
-        return merge(values, self.get_property(key))
-
-    def get_property(self, key):
-        """Expect Django Conf property"""
-        _key = DJANGO_CONF[key]
-        return getattr(self, _key, CONF_SPEC[_key])
 
     @property
     def module_name(self):
@@ -43,7 +29,7 @@ class Config(dict):
     @property
     def version(self):
         """return module version"""
-        return get_versions([self.module_name]).get(self.module_name, None)
+        raise NotImplementedError
 
     def set_module(self, module):
         """Just setter for module"""
@@ -65,7 +51,8 @@ class MasterConfig(object):
 
     """
 
-    def __init__(self, loaded_modules, config_spec, use_cache=True, *args, **kwargs):
+    def __init__(self, loaded_modules, config_spec,
+                 use_cache=True, *args, **kwargs):
         self.modules = loaded_modules
         self.config_spec = config_spec
         self._config = {}
