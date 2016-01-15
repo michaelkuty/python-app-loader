@@ -10,7 +10,7 @@ class AppLoader(object):
 
     MODULES_AUTOLOAD = True
 
-    CONFIG_MODULE_PREFIX = "LEONARDO"
+    CONFIG_PREFIX = "LEONARDO"
     CONFIG_MODULE_SPEC_CLASS = "app_loader.spec.CONF_SPEC"
     CONFIG_MODULE_OBJECT_CLASS = "app_loader.config.Config"
     CONFIG_MASTER_OBJECT_CLASS = "app_loader.config.MasterConfig"
@@ -131,10 +131,10 @@ class AppLoader(object):
         if hasattr(mod, 'default') \
                 or hasattr(mod,
                            '{}_module_conf'.format(
-                               self.CONFIG_MODULE_PREFIX.lower())):
+                               self.CONFIG_PREFIX.lower())):
             return True
         for key in dir(mod):
-            if self.CONFIG_MODULE_PREFIX.upper() in key:
+            if self.CONFIG_PREFIX.upper() in key:
                 return True
         return False
 
@@ -226,7 +226,7 @@ class AppLoader(object):
 
         # extract config keys from module or object
         for key, default_value in conf.items():
-            conf[key] = get_key_from_module(mod, key, default_value)
+            conf[key] = get_key_from_module(mod, key, default_value, self.CONFIG_PREFIX)
 
         # support for recursive dependecies
         try:

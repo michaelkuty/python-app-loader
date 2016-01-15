@@ -69,7 +69,9 @@ class MasterConfig(object):
 
         if attr not in self.config_spec.keys():
             raise KeyError('You tries to access key {}'
-                           ' which is not declared in spec {}'.format(
+                           ' which is not declared in spec {} '
+                            ', you may add this key to LEONARDO_CONF_SPEC '
+                            'dictionary in your local_settings file'.format(
                                attr,
                                ', '.join(self.config_spec.keys())))
 

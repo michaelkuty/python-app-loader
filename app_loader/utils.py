@@ -4,11 +4,12 @@ from django.utils import six
 from importlib import import_module
 
 
-def get_key_from_module(mod, key, default):
+def get_key_from_module(mod, key, default, config_prefix):
     if hasattr(mod, key):
         value = getattr(mod, key, default)
     else:
-        value = getattr(mod, 'LEONARDO_%s' % key.upper(), default)
+        value = getattr(mod, '%s_%s' % (
+            config_prefix.upper(), key.upper()), default)
     return value
 
 CONFIG_VALID = (list, tuple, dict)
