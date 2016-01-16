@@ -5,6 +5,18 @@ from importlib import import_module
 
 
 def get_key_from_module(mod, key, default, config_prefix):
+    '''returns key from object or module
+
+    tries to find key on object likes this::
+
+        my_conf.widgets = ['...']
+
+    and on pythom module::
+
+        LEONARDO_WIDGETS = ['...']
+
+    LEONARDO is config prefix which is configurable from main object
+    '''
     if hasattr(mod, key):
         value = getattr(mod, key, default)
     else:

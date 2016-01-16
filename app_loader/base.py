@@ -15,12 +15,6 @@ class AppLoader(object):
     CONFIG_MODULE_OBJECT_CLASS = "app_loader.config.Config"
     CONFIG_MASTER_OBJECT_CLASS = "app_loader.config.MasterConfig"
 
-    def disable_autoload(self):
-        self.MODULES_AUTOLOAD = False
-
-    def enable_autoload(self):
-        self.MODULES_AUTOLOAD = True
-
     def load_modules(self):
         """find all leonardo modules from environment"""
         if self.MODULES_AUTOLOAD:
@@ -332,3 +326,11 @@ class AppLoader(object):
 
         self._urlpatterns = urlpatterns
         return self._urlpatterns
+
+    def disable_autoload(self):
+        '''Just disable autoloading'''
+        self.MODULES_AUTOLOAD = False
+
+    def enable_autoload(self):
+        '''Just enable autoloading'''
+        self.MODULES_AUTOLOAD = True

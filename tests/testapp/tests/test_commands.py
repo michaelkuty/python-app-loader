@@ -51,7 +51,7 @@ class CommandTest(TestCase):
         # just propagate all loaded modules to settings
         modules = app_loader.get_modules()
 
-        self.assertEqual(len(app_loader.modules), 2)
+        self.assertEqual(len(app_loader.modules), 3)
 
         #self.assertIn('leonardo_multisite', app_loader.modules[1][1].apps)
 
