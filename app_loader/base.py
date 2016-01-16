@@ -149,31 +149,32 @@ class AppLoader(object):
             modules = []
 
             try:
-                import pip
-                installed_packages = pip.get_installed_distributions()
+                import pkgutil
+                installed_packages = [p[1]
+                                      for p in pkgutil.iter_modules()
+                                      if p[2]]
             except Exception:
                 installed_packages = []
                 warnings.warn(
-                    'pip is not installed module, scan module is skipped.',
+                    'error during auto loading modules,'
+                    ' scan module is skipped.',
                     RuntimeWarning)
 
-            for package in installed_packages:
+            for pkg_name in installed_packages:
                 # check for default descriptor
-                pkg_names = [k for k in package._get_metadata("top_level.txt")]
-                for pkg_name in pkg_names:
-                    if pkg_name not in self.blacklist:
-                        try:
-                            mod = import_module(pkg_name)
-                            if hasattr(mod, 'default') \
-                                    or hasattr(mod, 'leonardo_module_conf'):
+                if pkg_name not in self.blacklist:
+                    try:
+                        mod = import_module(pkg_name)
+                        if hasattr(mod, 'default') \
+                                or hasattr(mod, 'leonardo_module_conf'):
+                            modules.append(mod)
+                            continue
+                        for key in dir(mod):
+                            if 'LEONARDO' in key:
                                 modules.append(mod)
-                                continue
-                            for key in dir(mod):
-                                if 'LEONARDO' in key:
-                                    modules.append(mod)
-                                    break
-                        except Exception:
-                            pass
+                                break
+                    except Exception:
+                        pass
             self._found_modules = modules
         return self._found_modules
 
@@ -226,7 +227,8 @@ class AppLoader(object):
 
         # extract config keys from module or object
         for key, default_value in conf.items():
-            conf[key] = get_key_from_module(mod, key, default_value, self.CONFIG_PREFIX)
+            conf[key] = get_key_from_module(
+                mod, key, default_value, self.CONFIG_PREFIX)
 
         # support for recursive dependecies
         try:
