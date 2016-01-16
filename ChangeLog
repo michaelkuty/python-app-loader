@@ -1,0 +1,24 @@
+CHANGES
+=======
+
+0.0.4
+-----
+
+* Pep8 fix
+* Use pkgutil instead of pip for finding modules
+
+0.0.3
+-----
+
+* Small cleanup and provide better info about missing config key in specification
+* Get working Django urlpatterns and test flake8
+* Tune travis report and fix tox deps
+* Include just our tests
+* Travis cleanup remove mysql because it hasnt python3 yet remove python 3.5 from allow failures
+* cleanup
+* Skip pbr build
+* Add test requirement
+* Load config classes dynamically and merge some functions from utils to base Make config prefix configurable Add some test and cleanup some stuff
+* cleanup
+* raise KeyError from master config
+* Initial commit
