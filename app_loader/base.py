@@ -8,12 +8,31 @@ from .utils import get_key_from_module, get_object, merge, _decorate_urlconf
 
 class AppLoader(object):
 
+    # check all modules automaticaly
     MODULES_AUTOLOAD = True
 
+    # config prefix
     CONFIG_PREFIX = "LEONARDO"
+
+    # config specification schema
     CONFIG_MODULE_SPEC_CLASS = "app_loader.spec.CONF_SPEC"
+
+    # base class inicialized from config, based on dictionary
     CONFIG_MODULE_OBJECT_CLASS = "app_loader.config.Config"
+
+    # this class is used to encapsualtion of all loaded configs
     CONFIG_MASTER_OBJECT_CLASS = "app_loader.config.MasterConfig"
+
+    # check keys which are not in the config spec
+    CHECK_UNDEFINED_KEYS = True
+    # use keys which are not in the config spec
+    # add new keys into config spec and reload all modules
+    # this process can slow down booting your app and it's recommended
+    # add this keys into config spec
+    USE_UNDEFINED_KEYS = True
+
+    # array of tuples where [(key, value)]
+    undefined_keys = []
 
     def load_modules(self):
         """find all leonardo modules from environment"""
@@ -23,8 +42,20 @@ class AppLoader(object):
 
     @property
     def config_module_spec(self):
-        """return config module spec dictionary"""
-        return get_object(self.CONFIG_MODULE_SPEC_CLASS)
+        """return config module spec dictionary
+
+        note: updated config spec if undefined_keys are available
+        and enabled
+        """
+        spec = get_object(self.CONFIG_MODULE_SPEC_CLASS)
+
+        if self.new_keys:
+
+            for key_and_value in self.undefined_keys:
+                # TODO: check type and use empty value
+                spec[key_and_value[0]] = key_and_value[1]
+
+        return spec
 
     @property
     def config_master_class(self):
@@ -75,6 +106,20 @@ class AppLoader(object):
 
                 _modules.append((mod, mod_cfg,))
 
+            # we have new keys, start new loading now
+            if len(self.undefined_keys) > 0 and self.USE_UNDEFINED_KEYS:
+                warnings.warn('We found new keys(%s) and start '
+                              'loading again...'
+                              "It's recommended add new keys into "
+                              "%s_CONFIG_SPEC" % (self.undefined_keys,
+                                                  self.CONFIG_PREFIX))
+                _modules = []
+
+                for mod in self.modules:
+                    mod_cfg = self.get_conf_from_module(mod)
+                    _modules.append((mod, mod_cfg,))
+
+            # sort modules by ordering key
             _modules = sorted(_modules, key=lambda m: m[1].get('ordering'))
 
             self.loaded_modules = _modules
@@ -84,9 +129,18 @@ class AppLoader(object):
         return [module_cfg for mod, module_cfg in self.get_modules()]
 
     @property
+    def new_keys(self):
+        '''Just indicator for no cache'''
+        if self.CHECK_UNDEFINED_KEYS \
+                and self.USE_UNDEFINED_KEYS \
+                and len(self.undefined_keys) > 0:
+            return True
+        return False
+
+    @property
     def config(self):
         '''Master config'''
-        if not hasattr(self, '_config'):
+        if not hasattr(self, '_config') or self.new_keys:
             self._config = self.config_master_class(
                 self.get_modules(), self.empty_config)
         return self._config
@@ -214,15 +268,43 @@ class AppLoader(object):
 
         return mod
 
+    def _get_undefiend_keys(self, mod, conf):
+        '''return keys which are recognized but are not in schema'''
+        undefined_keys = []
+
+        conf_prefix = self.CONFIG_PREFIX + '_'
+
+        for key in dir(mod):
+            if key.lower().startswith(self.CONFIG_PREFIX.lower()):
+                _key = key.replace(conf_prefix, '').lower()
+                if _key not in conf.keys():
+                    undefined_keys.append((_key, getattr(mod, key)))
+
+        if len(undefined_keys) > 0:
+            warnings.warn(
+                'Found undefined keys %s in %s '
+                'We recommend add these keys into LEONARDO_CONF_SPEC' % (
+                    [key for key, val in undefined_keys], mod))
+
+        return undefined_keys
+
     def extract_conf_from(self, mod, conf, depth=0, max_depth=2):
         """recursively extract keys from module or object
-        by passed config scheme
+        by passed config scheme or finding all keys
         """
 
         # extract config keys from module or object
         for key, default_value in conf.items():
             conf[key] = get_key_from_module(
                 mod, key, default_value, self.CONFIG_PREFIX)
+
+        # check and update undefined keys
+        if self.CHECK_UNDEFINED_KEYS:
+            undefined_keys = self._get_undefiend_keys(mod, conf)
+            if self.USE_UNDEFINED_KEYS:
+                for key in undefined_keys:
+                    if key[0] not in self.undefined_keys:
+                        self.undefined_keys.append(key)
 
         # support for recursive dependecies
         try:
