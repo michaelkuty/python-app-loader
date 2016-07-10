@@ -59,6 +59,15 @@ class MasterConfig(object):
         self.use_cache = use_cache
         super(MasterConfig, self).__init__(*args, **kwargs)
 
+    def get_attr(self, name, default=None, fail_silently=True):
+        """return attribute
+
+        works same as __getattr__, but support default without error
+        """
+        if name not in self.config_spec.keys() and fail_silently:
+            return default
+        return self.__getattr__(name)
+
     def __getattr__(self, attr):
         '''merge all items or returns default by spec
         '''
