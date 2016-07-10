@@ -1,6 +1,19 @@
 CHANGES
 =======
 
+0.0.6
+-----
+
+* Add get_attribute helper
+* Add support for dynamically loaded keys from modules
+
+0.0.5
+-----
+
+* Custom PBR is not necessary
+* Cleanup tests
+* Update changelog
+
 0.0.4
 -----
 
