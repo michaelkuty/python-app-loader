@@ -360,7 +360,7 @@ class AppLoader(object):
         # Django-specific: import django now
         from django.utils.module_loading import module_has_submodule  # noqa
         from django.contrib.auth.decorators import login_required
-        from django.conf.urls import include, patterns, url
+        from django.conf.urls import include, url
 
         if hasattr(self, "_urlpatterns"):
             return self._urlpatterns
@@ -392,16 +392,13 @@ class AppLoader(object):
             # is public ?
             try:
                 if conf['is_public']:
-                    urlpatterns += \
-                        patterns('',
-                                 url(r'', include(urls_conf)),
-                                 )
+                    urlpatterns += [url(r'', include(urls_conf))]
                 else:
                     _decorate_urlconf(
                         url(r'', include(urls_conf)),
                         login_required)
-                    urlpatterns += patterns('',
-                                            url(r'', include(urls_conf)))
+                    urlpatterns += [url(r'', include(urls_conf))]
+
             except Exception as e:
                 raise Exception('raised %s during loading %s' %
                                 (str(e), urls_conf))
