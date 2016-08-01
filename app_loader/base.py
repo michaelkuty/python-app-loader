@@ -316,14 +316,24 @@ class AppLoader(object):
             warnings.warn('Error %s during loading %s' % (e, conf['apps']))
 
         for app in filtered_apps:
+
             try:
+
                 app_module = import_module(app)
+
                 if app_module != mod:
+
                     app_module = self.find_config_module(app_module)
+
                     if depth < max_depth:
+
+                        if not self.is_leonardo_module(app_module):
+                            continue
+
                         mod_conf = self.extract_conf_from(
                             app_module, conf=self.empty_config,
                             depth=depth + 1)
+
                         for k, v in mod_conf.items():
                             # prevent config duplicity
                             # skip config merge
@@ -333,6 +343,7 @@ class AppLoader(object):
                                 conf[k].update(v)
                             elif isinstance(v, (list, tuple)):
                                 conf[k] = merge(conf[k], v)
+
             except Exception as e:
                 pass  # swallow, but maybe log for info what happens
         return conf
