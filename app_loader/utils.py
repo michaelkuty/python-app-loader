@@ -24,6 +24,7 @@ def get_key_from_module(mod, key, default, config_prefix):
             config_prefix.upper(), key.upper()), default)
     return value
 
+
 CONFIG_VALID = (list, tuple, dict)
 
 

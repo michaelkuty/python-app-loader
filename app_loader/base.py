@@ -181,9 +181,11 @@ class AppLoader(object):
                            '{}_module_conf'.format(
                                self.CONFIG_PREFIX.lower())):
             return True
+
         for key in dir(mod):
             if self.CONFIG_PREFIX.upper() in key:
                 return True
+
         return False
 
     def find_modules(self):
@@ -221,6 +223,12 @@ class AppLoader(object):
                             if 'LEONARDO' in key:
                                 modules.append(mod)
                                 break
+                        if hasattr(mod, 'default_app_config'):
+                            for key in dir(mod):
+                                if key in self.empty_config.keys():
+                                    mod = get_object(mod.default_app_config)
+                                    modules.append(mod)
+                                    break
                     except Exception:
                         pass
             self._found_modules = modules
@@ -263,6 +271,7 @@ class AppLoader(object):
             _mod = import_module(mod_path)
             config_class = getattr(_mod, cls_name)
             # check if is leonardo config compliant
+
             if self.is_leonardo_module(config_class):
                 mod = config_class
 
@@ -310,9 +319,10 @@ class AppLoader(object):
         try:
             filtered_apps = [
                 app for app in conf['apps'] if app not in self.blacklist]
-        except TypeError:
-            pass
+        except TypeError as e:
+            raise Exception(conf['apps'])
         except Exception as e:
+            raise e
             warnings.warn('Error %s during loading %s' % (e, conf['apps']))
 
         for app in filtered_apps:

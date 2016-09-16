@@ -6,4 +6,4 @@ class Config(AppConfig):
     name = 'app_loader'
     verbose_name = "python-app-loader"
 
-    LEONARDO_APPS = ['app_loader']
+    apps = ['app_loader']
