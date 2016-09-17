@@ -8,12 +8,6 @@ from app_loader import app_loader
 
 class CommandTest(TestCase):
 
-    def test_00_app_class(self):
-
-        from app_loader.apps import Config
-
-        self.assertIsInstance(Config.LEONARDO_APPS, list)
-
     def test_01_app_loader(self):
 
         app_loader.disable_autoload()
@@ -51,7 +45,7 @@ class CommandTest(TestCase):
         # just propagate all loaded modules to settings
         modules = app_loader.get_modules()
 
-        self.assertEqual(len(app_loader.modules), 3)
+        self.assertEqual(len(app_loader.modules), 4)
 
         #self.assertIn('leonardo_multisite', app_loader.modules[1][1].apps)
 
