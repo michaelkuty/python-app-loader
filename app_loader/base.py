@@ -34,6 +34,20 @@ class AppLoader(object):
     # array of tuples where [(key, value)]
     undefined_keys = []
 
+    def __init__(self, autoload=True, prefix="leonardo",
+                 use_undefined_key=True, check_undefined_keys=True,
+                 master_class="app_loader.config.MasterConfig",
+                 module_class="app_loader.config.Config",
+                 spec_class="app_loader.spec.CONF_SPEC"):
+
+        self.MODULES_AUTOLOAD = autoload
+        self.CONFIG_PREFIX = prefix
+        self.USE_UNDEFINED_KEYS = use_undefined_key
+        self.CHECK_UNDEFINED_KEYS = use_undefined_key
+        self.CONFIG_MODULE_SPEC_CLASS = spec_class
+        self.CONFIG_MODULE_OBJECT_CLASS = module_class
+        self.CONFIG_MASTER_OBJECT_CLASS = master_class
+
     def load_modules(self):
         """find all leonardo modules from environment"""
         if self.MODULES_AUTOLOAD:

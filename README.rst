@@ -3,7 +3,7 @@
 python-app-loader
 =================
 
-Load configs from python modules or Django applications.
+Load configs from python modules especially Django applications. Plays well with Django application/modules. You can simply define your specification and then just load your modules which tells you what needs. It's universal and easy to use.
 
 .. contents::
     :local:
@@ -42,6 +42,23 @@ Your settings.py
     except ImportError:
         pass
 
+
+You can inicialize your AppLoader::
+
+    loader = AppLoader(autoload=False)
+
+    loader.get_app_modules(APPS)
+
+    print(loader.config.apps)
+
+or you can create your own AppLoader::
+
+    class MyAppLoader(AppLoader):
+
+        CONFIG_MASTER_OBJECT_CLASS = 'mymodule.MyMasterClass'
+
+
+For advance example check django-leonardo which uses this module for loading configurations from all modules. (about 60+ modules) which could be auto loaded without any requirements.
 
 Read More
 =========
