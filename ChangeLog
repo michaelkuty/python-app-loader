@@ -1,6 +1,25 @@
 CHANGES
 =======
 
+0.0.9
+-----
+
+* Support passing apploader settings throught constructor
+* Cleanup
+* Fix tests
+* Cleanup and fix load app loader itself
+
+0.0.8
+-----
+
+* Fix loading config from nested modules
+
+0.0.7
+-----
+
+* Remove useless patterns for Dj > 1.9
+* Update meta
+
 0.0.6
 -----
 
